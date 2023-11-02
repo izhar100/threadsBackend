@@ -3,7 +3,7 @@ const { User } = require("../models/userModel")
 require("dotenv").config()
 const protectRoute=async(req,res,next)=>{
     try {
-        const token=req.cookies.jwt
+        const token=req.headers.authorization.split(' ')[1] || req.cookies.jwt;
         if(!token){
             return res.status(401).json({msg:"Unauthorized"})
         }

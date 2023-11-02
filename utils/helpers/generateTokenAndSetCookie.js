@@ -5,9 +5,9 @@ const generateTokenAndSetCookie=(userId,res)=>{
         expiresIn:'10d'
     })
     res.cookie("jwt",token,{
-        httpOnly:true,
+        // httpOnly:true,
         maxAge:10*24*60*60*1000,
-        sameSite:"strict",//CSRf
+        // sameSite:"strict",//CSRf
     })
     return token
 }
