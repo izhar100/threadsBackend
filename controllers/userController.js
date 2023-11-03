@@ -36,7 +36,7 @@ const signupUser = async (req, res) => {
         const newUser = new User({
             name,
             email,
-            username,
+            username:username.toLowerCase(),
             password: hashedPassword
         });
         await newUser.save();
@@ -63,7 +63,8 @@ const signupUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        let { username, password } = req.body;
+        username=username.toLowerCase()
         const user = await User.findOne({ username })
         const isPasswordCorrect = await bcrypt.compare(password, user?.password || "")
         if (!user || !isPasswordCorrect) {
@@ -194,7 +195,7 @@ const getAllUsers = async (req, res) => {
             });
         } else {
             // If no 'name' query parameter is provided, fetch all users
-            users = await User.find();
+            users = await User.find().limit(5);
         }
 
         res.status(200).json(users);
