@@ -5,6 +5,7 @@ const cookieParser=require('cookie-parser')
 const { connectionDB } = require("./db/connection")
 const { userRouter } = require("./routes/userRoutes")
 const { postRouter } = require("./routes/postRoutes")
+const messageRoute = require("./routes/messageRoute")
 const cloudinay=require('cloudinary').v2
 require('dotenv').config()
 const port=process.env.port||8000
@@ -24,6 +25,7 @@ cloudinay.config({
 //Routes
 app.use("/api/users",userRouter)
 app.use("/api/posts",postRouter)
+app.use("/api/messages",messageRoute)
 app.listen(port,async()=>{
    try {
       await connectionDB
