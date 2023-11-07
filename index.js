@@ -1,11 +1,11 @@
 const express=require("express")
 const cors=require("cors")
-const app=express()
 const cookieParser=require('cookie-parser')
 const { connectionDB } = require("./db/connection")
 const { userRouter } = require("./routes/userRoutes")
 const { postRouter } = require("./routes/postRoutes")
 const messageRoute = require("./routes/messageRoute")
+const { app,server } = require("./socket/socket")
 const cloudinay=require('cloudinary').v2
 require('dotenv').config()
 const port=process.env.port||8000
@@ -26,7 +26,7 @@ cloudinay.config({
 app.use("/api/users",userRouter)
 app.use("/api/posts",postRouter)
 app.use("/api/messages",messageRoute)
-app.listen(port,async()=>{
+server.listen(port,async()=>{
    try {
       await connectionDB
       console.log('connected to database')
