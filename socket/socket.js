@@ -8,7 +8,8 @@ const server=http.createServer(app)
 
 const io = new Server(server,{
     cors:{
-        origin:"https://threadsclone-kappa.vercel.app",
+        // origin:"https://threadsclone-kappa.vercel.app",
+        origin:"http://127.0.0.1:5173",
         method:["GET","POST"]
     }
 })

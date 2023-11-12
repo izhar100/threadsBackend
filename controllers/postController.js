@@ -1,11 +1,11 @@
 const { Post } = require("../models/postModel");
 const { User } = require("../models/userModel");
-const cloudinay=require('cloudinary').v2
+const cloudinay = require('cloudinary').v2
 
 const createPost = async (req, res) => {
     try {
         const { postedBy, text } = req.body;
-        let {img}=req.body
+        let { img } = req.body
         if (!postedBy || !text) {
             return res.status(400).json({ error: "postedBy and text field is required!" })
         }
@@ -20,9 +20,9 @@ const createPost = async (req, res) => {
         if (text.length > maxLength) {
             return res.status(400).json({ error: `Text length should be less than ${maxLength} characters!` })
         }
-        if(img){
-            const uploadedResponse=await cloudinay.uploader.upload(img)
-            img=uploadedResponse.secure_url
+        if (img) {
+            const uploadedResponse = await cloudinay.uploader.upload(img)
+            img = uploadedResponse.secure_url
         }
         const newPost = new Post({ postedBy, text, img })
         await newPost.save()
@@ -57,8 +57,8 @@ const deletePost = async (req, res) => {
         if (post.postedBy.toString() !== req.user._id.toString()) {
             return res.status(403).json({ error: 'You are unauthorized to delete this post' });
         }
-        if(post.img){
-            const imageId=post.img.split("/").pop().split(".")[0];
+        if (post.img) {
+            const imageId = post.img.split("/").pop().split(".")[0];
             await cloudinay.uploader.destroy(imageId)
         }
         await Post.findByIdAndDelete(req.params.id)
@@ -96,20 +96,20 @@ const likeUnlikePost = async (req, res) => {
 
 const replyToPost = async (req, res) => {
     try {
-        const {text}=req.body
+        const { text } = req.body
         const { id: postId } = req.params
         const userId = req.user._id;
-        const userProfilePic=req.user.profilePic
-        const username=req.user.username
-        const name=req.user.name
-        if(!text){
-            return res.status(400).json({error:"Text field is required!"})
+        const userProfilePic = req.user.profilePic
+        const username = req.user.username
+        const name = req.user.name
+        if (!text) {
+            return res.status(400).json({ error: "Text field is required!" })
         }
         const post = await Post.findById(postId)
         if (!post) {
             return res.status(404).json({ error: `Post not found!` });
         }
-        const reply={userId,text,username,userProfilePic,name}
+        const reply = { userId, text, username, userProfilePic, name }
         post.replies.push(reply)
         await post.save()
         res.status(201).json(reply)
@@ -120,41 +120,42 @@ const replyToPost = async (req, res) => {
     }
 }
 
-const getFeedPosts=async(req,res)=>{
+const getFeedPosts = async (req, res) => {
     try {
-        const userId=req.user._id;
-        const user= await User.findById(userId)
-        if(!user){
-            return res.status(404).json({error:"User not found"})
+        const userId = req.user._id;
+        const user = await User.findById(userId)
+        const admin= await User.findOne({username:'ezhar'})
+        if (!user) {
+            return res.status(404).json({ error: "User not found" })
         }
-        const following=user.following;
-        if(following.length==0){
-            const feeds=await Post.find().sort({createdAt:-1}).limit(5)
+        const following = user.following;
+        if (following.length == 0) {
+            const feeds=await Post.find({postedBy:admin._id}).sort({createdAt:-1}).limit(5)
             return res.status(200).json(feeds)
         }
-        const feedPosts=await Post.find({postedBy:{$in:following}}).sort({createdAt:-1})
+        const feedPosts = await Post.find({ postedBy: { $in: following } }).sort({ createdAt: -1 })
         res.status(200).json(feedPosts)
-        
+
     } catch (error) {
         res.status(500).json({ error: error.message })
         console.log("Error in getFeedPosts: ", error.message)
     }
 }
 
-const getUserPosts=async(req,res)=>{
-   const {username}=req.params
-   try {
-    const user=await User.findOne({username});
-    if(!user){
-        return res.status(400).json({error:'User not found'})
+const getUserPosts = async (req, res) => {
+    const { username } = req.params
+    try {
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(400).json({ error: 'User not found' })
+        }
+        const posts = await Post.find({ postedBy: user._id }).sort({ createdAt: -1 })
+        res.status(200).json(posts)
+
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+        console.log("Error in getUserPosts: ", error.message)
     }
-    const posts= await Post.find({postedBy:user._id}).sort({createdAt:-1})
-    res.status(200).json(posts)
-    
-   } catch (error) {
-    res.status(500).json({ error: error.message })
-    console.log("Error in getUserPosts: ", error.message)
-   }
 }
 
 module.exports = {

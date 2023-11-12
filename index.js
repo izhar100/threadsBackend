@@ -29,7 +29,7 @@ app.use("/api/messages",messageRoute)
 server.listen(port,async()=>{
    try {
       await connectionDB
-      console.log('connected to database')
+      console.log('connected to database')+
       console.log(`server is running at port:http://localhost:${port}`)
    } catch (error) {
     console.log("error connecting to server")

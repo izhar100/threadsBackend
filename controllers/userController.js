@@ -195,7 +195,7 @@ const getAllUsers = async (req, res) => {
             });
         } else {
             // If no 'name' query parameter is provided, fetch all users
-            users = await User.find().limit(5);
+            users = await User.find().sort({createdAt:1}).limit(5);
         }
 
         res.status(200).json(users);
