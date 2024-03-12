@@ -49,6 +49,7 @@ const getMessages=async(req,res)=>{
     const {otherUserId}=req.params;
     const userId=req.user._id;
     try {
+        const {page}=req.query
         const conversation=await Conversation.findOne({
             participants:{$all:[userId,otherUserId]}
         })
@@ -57,7 +58,7 @@ const getMessages=async(req,res)=>{
         }
         const messages=await Message.find({
             conversationId:conversation._id
-        }).sort({createdAt:1})
+        }).sort({createdAt:-1}).skip((Number(page)-1)*20).limit(20)
         res.status(200).json(messages)
     } catch (error) {
      console.log("error in getMessage: ",error.message)

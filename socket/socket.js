@@ -9,7 +9,7 @@ const server=http.createServer(app)
 const io = new Server(server,{
     cors:{
         origin:"https://threadsclone-kappa.vercel.app",
-        // origin:"http://127.0.0.1:5173",
+        // origin:"http://localhost:5173",
         method:["GET","POST"]
     }
 })
@@ -30,6 +30,10 @@ io.on('connection',(socket)=>{
     socket.on("disconnect",()=>{
         delete userSocketMap[userId];
         io.emit("getOnlineUsers",Object.keys(userSocketMap))
+    })
+    socket.on("user:call",({to,offer})=>{
+        console.log("call:",to,offer)
+        io.to(to).emit("incoming:call",{from:socket.id,offer})
     })
 })
 

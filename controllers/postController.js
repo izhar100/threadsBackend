@@ -122,19 +122,24 @@ const replyToPost = async (req, res) => {
 
 const getFeedPosts = async (req, res) => {
     try {
+        const {page}=req.query
         const userId = req.user._id;
         const user = await User.findById(userId)
-        const admin= await User.findOne({username:'ezhar'})
         if (!user) {
             return res.status(404).json({ error: "User not found" })
         }
         const following = user.following;
         if (following.length == 0) {
-            const feeds=await Post.find().sort({createdAt:-1}).limit(5)
+            const feeds=await Post.find().sort({createdAt:-1}).skip((Number(page)-1)*10).limit(10)
             return res.status(200).json(feeds)
         }
-        const feedPosts = await Post.find({ postedBy: { $in: following } }).sort({ createdAt: -1 })
-        res.status(200).json(feedPosts)
+        const feedPosts = await Post.find({ postedBy: { $in: following } }).sort({ createdAt: -1 }).skip((Number(page)-1)*10).limit(10)
+        if(page==1 && feedPosts.length==0){
+            const feeds=await Post.find().sort({createdAt:-1}).skip((Number(page)-1)*10).limit(10)
+            return res.status(200).json(feeds)
+        }else{
+           return res.status(200).json(feedPosts)
+        }
 
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -145,11 +150,12 @@ const getFeedPosts = async (req, res) => {
 const getUserPosts = async (req, res) => {
     const { username } = req.params
     try {
+        const {page}=req.query
         const user = await User.findOne({ username });
         if (!user) {
             return res.status(400).json({ error: 'User not found' })
         }
-        const posts = await Post.find({ postedBy: user._id }).sort({ createdAt: -1 })
+        const posts = await Post.find({ postedBy: user._id }).sort({ createdAt: -1 }).skip((Number(page)-1)*10).limit(10)
         res.status(200).json(posts)
 
     } catch (error) {
